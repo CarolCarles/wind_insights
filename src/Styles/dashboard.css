@@ -1,0 +1,293 @@
+/* Define um container geral ocupando 100% da tela */
+.general-container {
+    display: flex;
+    flex-direction: row;
+    width: 99vw;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: aliceblue;
+    /* background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 29%, rgba(0,212,255,1) 100%) */
+}
+
+/* CSV Table: Alinhado à direita ocupando 30% da largura da tela */
+.csv-table {
+    width: 30%;
+    overflow: auto;
+    max-height: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+/* Container para os gráficos, ocupando 70% da largura */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    width: 97%;
+    gap: 10px;
+    padding-left: 20px;
+    margin-right: 10px;
+}
+
+/* Container superior dividindo SerieSpeedColumn e Wind Rose */
+.chart-top {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    gap: 10px;
+}
+
+/* SerieSpeedColumn e Wind Rose lado a lado */
+.chart-column, .wind-rose, .new-chart{
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+    border: 1px ; 
+    border-radius: 1%;
+    padding: 10px;
+    border: blue solid 1px;
+    /* background: linear-gradient(90deg, rgba(90,111,214,1) 0%, rgba(135,163,255,0.7987570028011204) 18%); */
+}
+
+/* SerieSpeedLine abaixo dos outros elementos */
+.chart-line {
+    flex: 1;
+    width: 98%;
+    border: 1px;
+    padding: 12.5px;
+    background: #ffffff;
+    border-radius: 1%;
+    border: blue solid 1px;
+    /* background: linear-gradient(90deg, rgba(90,111,214,1) 0%, rgba(135,163,255,0.7987570028011204) 18%); */
+}
+
+.btn-analise {
+    background: linear-gradient(90deg, #0742e6 60%, #00bfff 100%);
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 600;
+    padding: 14px 38px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(7, 66, 230, 0.13);
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+}
+
+.btn-analise:hover {
+    background: linear-gradient(90deg, #0742e6 80%, #00bfff 100%);
+    box-shadow: 0 4px 24px rgba(7, 66, 230, 0.18);
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* #stick-plot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin-top: 10px;
+} */
+
+
+/* Moderno para react-datepicker */
+.modern-datepicker {
+  border-radius: 12px !important;
+  border: 1.5px solid #b3c8f9 !important;
+  box-shadow: 0 4px 24px #e3e9f7 !important;
+  font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+  background: #fff !important;
+}
+.modern-datepicker .react-datepicker__header {
+  background: #f7faff !important;
+  border-bottom: 1px solid #b3c8f9 !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+.modern-datepicker .react-datepicker__current-month,
+.modern-datepicker .react-datepicker__day-name {
+  color: #0742e6 !important;
+  font-weight: 600;
+}
+.modern-datepicker .react-datepicker__day--selected,
+.modern-datepicker .react-datepicker__day--in-selecting-range,
+.modern-datepicker .react-datepicker__day--in-range {
+  background: linear-gradient(90deg, #0742e6 60%, #1a237e 100%) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+.modern-datepicker .react-datepicker__day:hover {
+  background: #b3c8f9 !important;
+  color: #0742e6 !important;
+  border-radius: 8px !important;
+}
+
+/* dashboard.css */
+
+/* .csv-upload-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 18px;
+  background: #f7faff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #e3e9f7;
+  padding: 10px 18px;
+  width: 97%;
+  margin: 0 0 18px 0;
+}
+
+.csv-upload-btn {
+  background: linear-gradient(90deg, #0742e6 60%, #1a237e 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  height: 45px;
+  width: 260px;
+  min-width: 170px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #b3c8f9;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.csv-file-info {
+  border: 1.5px solid #b3c8f9;
+  height: 45px;
+  line-height: 45px;
+  padding-left: 14px;
+  padding-right: 14px;
+  width: 100%;
+  background: #fff;
+  color: #0742e6;
+  font-weight: 500;
+  font-size: 15px;
+  border-left: none;
+  border-right: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.csv-remove-btn {
+  background: linear-gradient(90deg, #0742e6 60%, #1a237e 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  height: 45px;
+  padding: 0 28px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #e3e9f7;
+  transition: background 0.2s;
+}
+
+.csv-progress-bar {
+  width: 100%;
+  margin: 0 0 10px 0;
+}
+
+.csv-info-message {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 0 10px;
+  font-style: italic;
+  color: #0742e6;
+  font-size: 15px;
+}
+
+.csv-filters-box {
+  background: #fff;
+  border: 1.5px solid #b3c8f9;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px #e3e9f7;
+  padding: 22px 32px 18px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.csv-title {
+  min-width: 260px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0742e6;
+  font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 16px #e3e9f7, 0 1px 0 #fff;
+}
+
+.csv-filters-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  margin-right: 16px;
+}
+
+.csv-filter-box {
+  background: #f7faff;
+  border: 1.5px solid #b3c8f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #e3e9f7;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  min-width: 270px;
+  margin-right: 12px;
+  position: relative;
+}
+
+.csv-filter-label {
+  color: #0742e6;
+  font-weight: 600;
+  font-size: 15px;
+  margin-right: 10px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.csv-filter-label-vel {
+  color: #0742e6;
+  font-weight: 600;
+  font-size: 15px;
+  margin-right: 14px;
+  white-space: nowrap;
+}
+
+.csv-info-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e3e9f7;
+  color: #0742e6;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 8px;
+  border: 1px solid #b3c8f9;
+}
+
+.csv-datepicker {
+  width: 150px;
+  height: 36px;
+  border: 1.5px solid #b3c8f9;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 15px;
+  color: #1a237e;
+  background: #fff;
+  outline: none;
+  box-shadow: 0 1px 4px #e3e9f7;
+  transition: border 0.2s;
+} */
