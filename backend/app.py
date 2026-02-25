@@ -59,8 +59,6 @@ CORS(app)
 def index():
     return "It's Working!"
 
-
-
 @app.route('/processar', methods=['POST'])
 def processar_dados():
     try:
@@ -70,8 +68,6 @@ def processar_dados():
         # Calcula a média móvel e mantém os dados originais
         df['ws100_suavizado'] = df['ws100'].rolling(window=6).mean().fillna(0)
 
-
-
         # Formata os dados como uma lista de arrays: [timestamp, valor_suavizado]
         dados_formatados = [
             [row['id'], row['ws100_suavizado']]
@@ -79,7 +75,6 @@ def processar_dados():
         ]
 
         # print("Dados formatados:", dados_formatados)
-
         return jsonify(dados_formatados), 200
 
     except Exception as e:
