@@ -10,27 +10,70 @@ if (typeof HighchartsExporting === "function") {
 }
 
 function SerieSuavizada({ data }) {
-    const [chartData, setChartData] = useState([]);
 
-        // Esse funciona com timestamps
-                useEffect(() => {
-            if (data) {
-                // Converte o primeiro elemento (data/hora) para timestamp
-                const formattedData = data
-                    .map(row => [
-                        typeof row[0] === "string" ? new Date(row[0]).getTime() : row[0],
-                        Number(row[1])
-                    ])
-                    .filter(row => row[0] && !isNaN(row[1]));
-                setChartData(formattedData);
-                console.log("-- >>> DADOS SMOOTHING: <<< ---", data);
-                console.log("-- >>> DADOS SMOOTHING formatados: <<< ---", formattedData);
+    const chartData = React.useMemo(() => {
+        if (!data) return [];
 
-            }
-        }, [data]);
+        return data.map(row => [
+            typeof row[0] === "string"
+                ? Date.parse(row[0])
+                : row[0],
+            Number(row[1])
+        ]).filter(row => row[0] && !isNaN(row[1]));
 
-    
-        const options = {
+    }, [data]);
+
+    // // Esse funciona com timestamps
+    // useEffect(() => {
+    //     if (data) {
+    //         // Converte o primeiro elemento (data/hora) para timestamp
+    //         const formattedData = data
+    //             .map(row => [
+    //                 typeof row[0] === "string" ? new Date(row[0]).getTime() : row[0],
+    //                 Number(row[1])
+    //             ])
+    //             .filter(row => row[0] && !isNaN(row[1]));
+    //         setChartData(formattedData);
+    //         console.log("-- >>> DADOS SMOOTHING: <<< ---", data);
+    //         console.log("-- >>> DADOS SMOOTHING formatados: <<< ---", formattedData);
+
+    //     }
+    // }, [data]);
+
+    // const options = {
+    //     chart: {
+    //         type: 'line',
+    //         zoomType: 'x',
+    //     },
+    //     title: {
+    //         text: "Série Suavizada com Média Móvel de 6 Passos",
+    //     },
+    //     colors: ['#000'],
+    //     xAxis: {
+    //         type: 'datetime', // Define o eixo X como um eixo de tempo
+    //         title: {
+    //             text: 'Data', // Título do eixo X
+    //         },
+    //         // dateTimeLabelFormats: {
+    //         //     //day: '%d/%m/%Y', // Formato para exibir apenas a data
+    //         //     // hour: '%[HM]',
+    //         //     day: '%[eb]',
+    //         //     month: '%[bY]',
+    //         //     year: '%Y'
+    //         // },
+    //     },
+    //     yAxis: {
+    //         title: {
+    //             text: 'Velocidade (m/s)',
+    //         },
+    //     },
+    //     series: [{
+    //         name: 'Velocidade Suavizada',
+    //         data: chartData,  // Passa os dados formatados diretamente
+    //     }],
+    // };
+
+    const options = React.useMemo(() => ({
         chart: {
             type: 'line',
             zoomType: 'x',
@@ -40,28 +83,17 @@ function SerieSuavizada({ data }) {
         },
         colors: ['#000'],
         xAxis: {
-            type: 'datetime', // Define o eixo X como um eixo de tempo
-            title: {
-                text: 'Data', // Título do eixo X
-            },
-            // dateTimeLabelFormats: {
-            //     //day: '%d/%m/%Y', // Formato para exibir apenas a data
-            //     // hour: '%[HM]',
-            //     day: '%[eb]',
-            //     month: '%[bY]',
-            //     year: '%Y'
-            // },
+            type: 'datetime',
+            title: { text: 'Data' },
         },
         yAxis: {
-            title: {
-                text: 'Velocidade (m/s)',
-            },
+            title: { text: 'Velocidade (m/s)' },
         },
         series: [{
             name: 'Velocidade Suavizada',
-            data: chartData,  // Passa os dados formatados diretamente
+            data: chartData,
         }],
-    };
+    }), [chartData]);
 
     return (
         <div className='return'>
@@ -83,7 +115,7 @@ function SerieSuavizada({ data }) {
                 <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.<br />
                 Selecione uma área do gráfico para dar zoom.<br />
                 Clique em "Reset Zoom" para voltar à visualização completa.<br />
-                <i style={{color:"#1a237e", fontSize: 12}}> ** Por conta do tamanho do CSV e dos cálculos necessários, este gráfico pode demorar a carregar.</i> 
+                <i style={{ color: "#1a237e", fontSize: 12 }}> ** Por conta do tamanho do CSV e dos cálculos necessários, este gráfico pode demorar a carregar.</i>
             </div>
             {chartData.length > 0 ? ( // Verifica se o CSV não está vazio (errado)
                 <HighchartsReact highcharts={Highcharts} options={options} /> // True
@@ -95,4 +127,3 @@ function SerieSuavizada({ data }) {
 }
 
 export default SerieSuavizada;
-
