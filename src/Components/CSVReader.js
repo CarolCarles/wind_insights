@@ -60,6 +60,7 @@ export default function CSVReader() {
   const [headers, setHeaders] = useState(null);
   const [columnMap, setColumnMap] = useState(null);
   const [readerKey, setReaderKey] = useState(0);
+  const [hasHeader, setHasHeader] = useState(true);
 
   useEffect(() => {
     console.log("CSV atualizado:", csvData);
@@ -205,6 +206,65 @@ export default function CSVReader() {
     }
   }, [rawRows, columnMap]);
 
+  const detectDelimiter = (sampleLine) => {
+    const countSemicolon = (sampleLine.match(/;/g) || []).length;
+    const countComma = (sampleLine.match(/,/g) || []).length;
+    return countSemicolon > countComma ? ";" : ",";
+  };
+
+  const splitLine = (line, delimiter) => {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === delimiter && !inQuotes) {
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const cleanField = (field) => {
+    return String(field)
+      .replace(/\\"/g, "")
+      .replace(/^"|"$/g, "")
+      .trim();
+  };
+
+  const processRawText = (rawText) => {
+    // Remove BOM se presente
+    const text = rawText.replace(/^\uFEFF/, "");
+
+    // Pega as primeiras linhas não-vazias para detectar delimitador
+    const nonEmptyLines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (nonEmptyLines.length === 0) return { headers: [], rows: [] };
+
+    const delimiter = detectDelimiter(nonEmptyLines[0]);
+
+    const allRows = nonEmptyLines.map(line => splitLine(line, delimiter).map(cleanField));
+
+    const firstRow = allRows[0];
+    const pareceHeader = firstRow.some(v => isNaN(parseFloat(v)) && v.trim() !== "");
+
+    let headerRow, dataRows;
+    if (pareceHeader) {
+      headerRow = firstRow;
+      dataRows = allRows.slice(1);
+    } else {
+      headerRow = firstRow.map((_, i) => `Coluna ${i + 1}`);
+      dataRows = allRows;
+    }
+
+    return { headers: headerRow, rows: dataRows, hasHeaderDetected: pareceHeader };
+  };
+
   return (
     <>
       <CSVReader
@@ -212,7 +272,7 @@ export default function CSVReader() {
         config={{
           header: false,
           skipEmptyLines: true,
-          delimiter: ",",
+          delimiter: "",
           quoteChar: null,
           escapeChar: "\\",
         }}
@@ -221,39 +281,53 @@ export default function CSVReader() {
           setCsvData(null);
           setRespostaApi(null);
 
-          let linhas = results.data.filter(r => r.length);
+          // let linhas = results.data.filter(r => r.length);
 
-          // Limpa cada campo de qualquer aspas ou backslashes residuais
-          linhas = linhas.map(linha => {
-            // Se a linha veio inteira como string única (fallback)
-            if (linha.length === 1 && typeof linha[0] === "string") {
-              let texto = linha[0].trim().replace(/^\uFEFF/, "");
-              if (texto.startsWith('"') && texto.endsWith('"')) {
-                texto = texto.slice(1, -1);
-              }
-              texto = texto.replace(/""/g, '"');
-              linha = texto.split(",");
-            }
+          // // Limpa cada campo de qualquer aspas ou backslashes residuais
+          // linhas = linhas.map(linha => {
+          //   // Se a linha veio inteira como string única (fallback)
+          //   if (linha.length === 1 && typeof linha[0] === "string") {
+          //     let texto = linha[0].trim().replace(/^\uFEFF/, "");
+          //     if (texto.startsWith('"') && texto.endsWith('"')) {
+          //       texto = texto.slice(1, -1);
+          //     }
+          //     texto = texto.replace(/""/g, '"');
+          //     linha = texto.split(",");
+          //   }
 
-            // Limpa cada campo individualmente (aspas simples, duplas, backslashes)
-            return linha.map(campo =>
-              String(campo)
-                .replace(/\\"/g, "")   // remove \"
-                .replace(/^"|"$/g, "") // remove aspas no início/fim
-                .trim()
-            );
-          });
+          //   // Limpa cada campo individualmente (aspas simples, duplas, backslashes)
+          //   return linha.map(campo =>
+          //     String(campo)
+          //       .replace(/\\"/g, "")   // remove \"
+          //       .replace(/^"|"$/g, "") // remove aspas no início/fim
+          //       .trim()
+          //   );
+          // });
 
-          const primeiraLinha = linhas[0];
-          const pareceHeader = primeiraLinha.some(v => isNaN(parseFloat(v)));
+          // const primeiraLinha = linhas[0];
+          // const pareceHeader = primeiraLinha.some(v => isNaN(parseFloat(v)));
 
-          if (pareceHeader) {
-            setHeaders(primeiraLinha);
-            setRawRows(linhas.slice(1));
-          } else {
-            setHeaders(primeiraLinha.map((_, i) => `Coluna ${i + 1}`));
-            setRawRows(linhas);
-          }
+          // if (pareceHeader) {
+          //   setHeaders(primeiraLinha);
+          //   setRawRows(linhas.slice(1));
+          // } else {
+          //   setHeaders(primeiraLinha.map((_, i) => `Coluna ${i + 1}`));
+          //   setRawRows(linhas);
+          // }
+          const rawLines = results.data
+            .filter(r => r.length > 0)
+            .map(r => {
+              // Se veio como array de múltiplos campos (fallback do papaparse)
+              if (r.length > 1) return r.join(",");
+              return String(r[0] || "");
+            });
+
+          const rawText = rawLines.join("\n");
+          const { headers: detectedHeaders, rows, hasHeaderDetected } = processRawText(rawText);
+
+          setHasHeader(hasHeaderDetected);
+          setHeaders({ columns: detectedHeaders, hasHeaderDetected, rawRows: rows, rawText });
+          setRawRows(rows);
         }}
       >
         {({ getRootProps, acceptedFile, ProgressBar, getRemoveFileProps }) => (
@@ -359,7 +433,48 @@ export default function CSVReader() {
 
       {headers && !columnMap && (
         <ColumnMapper
-          headers={headers}
+          headers={headers.columns}
+          hasHeaderDetected={headers.hasHeaderDetected}
+          rawRows={rawRows}
+          onHeaderToggle={(userSaysHasHeader) => {
+            // re-processa as linhas quando o usuário altera o checkbox de cabeçalho
+            const rawText = headers.rawText;
+            const nonEmptyLines = rawText.split(/\n/).filter(l => l.trim().length > 0);
+            const delimiter = nonEmptyLines.length > 0
+              ? (nonEmptyLines[0].match(/;/g) || []).length > (nonEmptyLines[0].match(/,/g) || []).length ? ";" : ","
+              : ",";
+
+            const cleanField = (field) =>
+              String(field).replace(/\\"/g, "").replace(/^"|"$/g, "").trim();
+
+            const splitLine = (line, delim) => {
+              const result = [];
+              let current = "";
+              let inQuotes = false;
+              for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') { inQuotes = !inQuotes; }
+                else if (ch === delim && !inQuotes) { result.push(current.trim()); current = ""; }
+                else { current += ch; }
+              }
+              result.push(current.trim());
+              return result;
+            };
+
+            const allRows = nonEmptyLines.map(line => splitLine(line, delimiter).map(cleanField));
+
+            if (userSaysHasHeader) {
+              setHeaders(prev => ({ ...prev, columns: allRows[0], hasHeaderDetected: true }));
+              setRawRows(allRows.slice(1));
+            } else {
+              setHeaders(prev => ({
+                ...prev,
+                columns: allRows[0].map((_, i) => `Coluna ${i + 1}`),
+                hasHeaderDetected: false
+              }));
+              setRawRows(allRows);
+            }
+          }}
           onConfirm={setColumnMap}
         />
       )}

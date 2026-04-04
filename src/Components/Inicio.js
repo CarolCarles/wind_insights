@@ -61,7 +61,8 @@ function Inicio() {
         <b style={{ color: "#0742e6", textAlign: "left" }}>Como usar:</b>
         <ol style={{ lineHeight: 1.7, textAlign: "left" }}>
           <li>Faça upload do seu arquivo CSV.</li>
-          <li>Defina o mapeamento das colunas.</li>
+          <li>Confirme se o arquivo tem cabeçalho.</li>
+          <li>Preencha os dados de vento e tempo.</li>
           <li>Use os filtros para explorar os dados.</li>
           <li>Veja os gráficos gerados automaticamente.</li>
         </ol>
