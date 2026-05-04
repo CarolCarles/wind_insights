@@ -11,6 +11,7 @@ import ChartHistogram from "./ChartHistogram";
 import SpiralChart from "./SpiralChart"
 import SerieSuavizada from "./SerieSuavizada";
 import StickPlot from "./StickPlot";
+import DFAChart from "./DFAChart";
 import ColumnMapper from "./ColumnMapper";
 
 import { Link } from "react-router-dom"; // Importe o Link do React Router
@@ -737,6 +738,10 @@ export default function CSVReader() {
                 <div className="chart-column">
                   <SpiralChart data={displayedData} />
                 </div>
+              </div>
+              
+              <div className="chart-line">
+                <DFAChart data={displayedData} />
               </div>
 
               <div style={{ marginTop: "18px", textAlign: "center" }}>
