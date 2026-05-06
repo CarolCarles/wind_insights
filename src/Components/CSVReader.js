@@ -53,6 +53,7 @@ const styles = {
 export default function CSVReader() {
   const { CSVReader } = useCSVReader();
   const [csvData, setCsvData] = useState(null);
+  const [dfaData, setDfaData] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [speedRange, setSpeedRange] = useState([0, 20]); // Intervalo inicial de velocidade ajustado
@@ -76,6 +77,19 @@ export default function CSVReader() {
       console.log('Dados Recebidos da API:', respostaApi);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
+    }
+  };
+
+  const calcularDFA = async (dados) => {
+    try {
+      const response = await axios.post(
+        'https://dashboard-backend-vf4t.onrender.com/dfa',
+        dados
+      );
+      console.log('Resposta DFA:', response.data);
+      setDfaData(response.data);
+    } catch (error) {
+      console.error('Erro ao calcular DFA:', error);
     }
   };
 
@@ -204,6 +218,7 @@ export default function CSVReader() {
       const dados = normalizarDados(rawRows, columnMap);
       setCsvData(dados);
       enviarParaApi(dados);
+      calcularDFA(dados);
     }
   }, [rawRows, columnMap]);
 
@@ -739,9 +754,9 @@ export default function CSVReader() {
                   <SpiralChart data={displayedData} />
                 </div>
               </div>
-              
+
               <div className="chart-line">
-                <DFAChart data={displayedData} />
+                <DFAChart data={dfaData} totalRegistros={csvData?.length} />
               </div>
 
               <div style={{ marginTop: "18px", textAlign: "center" }}>
