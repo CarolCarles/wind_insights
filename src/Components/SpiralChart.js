@@ -61,8 +61,9 @@ function SpiralChart({ data }) {
     chart: {
       type: 'scatter',
       backgroundColor: "#fff",
-      width: 600,   // Diminua para caber melhor na tela
-      height: 500,  // Diminua para caber melhor na tela
+      width: null,   // null = herda 100% do container
+      height: 500,
+      reflow: true,  // re-renderiza quando o container redimensionar
     },
     title: { text: "Espiral Contínua (1 volta = 1 mês)" },
     xAxis: { title: { text: " " }, gridLineColor: "lightgray", gridLineWidth: 1 },
@@ -115,7 +116,6 @@ function SpiralChart({ data }) {
       }
     ],
     legend: { enabled: true },
-    credits: { enabled: false },
   };
 
   return <HighchartsReact highcharts={Highcharts} options={options} />;
