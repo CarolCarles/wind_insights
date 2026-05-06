@@ -82,10 +82,7 @@ export default function CSVReader() {
 
   const calcularDFA = async (dados) => {
     try {
-      const response = await axios.post(
-        'https://dashboard-backend-vf4t.onrender.com/dfa',
-        dados
-      );
+      const response = await axios.post('https://wind-insights.onrender.com/dfa', dados);
       console.log('Resposta DFA:', response.data);
       setDfaData(response.data);
     } catch (error) {
