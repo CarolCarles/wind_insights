@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCSVReader } from "react-papaparse";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Slider } from "@mui/material";
+import axios from 'axios';
 
-// Importando os componentes de gráficos
 import Inicio from "./Inicio";
 import SerieSpeed from "./SerieSpeed";
 import SerieDirection from "./SerieDirection";
@@ -14,16 +17,10 @@ import StickPlot from "./StickPlot";
 import DFAChart from "./DFAChart";
 import ColumnMapper from "./ColumnMapper";
 
-import { Link } from "react-router-dom"; // Importe o Link do React Router
-
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { Slider } from "@mui/material"; // Slider para o filtro de velocidade
 import '../App.css';
 import '../Styles/dashboard.css';
 import '../Styles/table.css';
 import '../Styles/charts.css';
-import axios from 'axios';
 
 const styles = {
   csvReader: {
@@ -56,7 +53,8 @@ export default function CSVReader() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [speedRange, setSpeedRange] = useState([0, 20]); // Intervalo inicial de velocidade ajustado
-  const [respostaApi, setRespostaApi] = useState(null); // Estado para armazenar a resposta da API
+  const [respostaApiSS, setRespostaApiSS] = useState(null); // Estado para armazenar a resposta da API
+  const [respostaApiDFA, setRespostaApiDFA] = useState(null);
   const [rawRows, setRawRows] = useState(null);
   const [headers, setHeaders] = useState(null);
   const [columnMap, setColumnMap] = useState(null);
@@ -67,13 +65,22 @@ export default function CSVReader() {
     console.log("CSV atualizado:", csvData);
   }, [csvData]);
 
-  const enviarParaApi = async (dados) => {
+  {/* Processamento Série Suavizada */}
+  const enviarParaApiSS = async (dados) => {
     try {
       // const response = await axios.post('http://localhost:5000/processar', dados);
       const response = await axios.post('https://dashboard-backend-vf4t.onrender.com/processar', dados);
-      console.log('Resposta da API:', response.data);
-      setRespostaApi(response.data); // Armazena a resposta da API no estado
-      console.log('Dados Recebidos da API:', respostaApi);
+      setRespostaApiSS(response.data); // Armazena a resposta da API no estado
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+    }
+  };
+
+  {/* Processamento DFA */}
+  const enviarParaApiDFA = async (dados) => {
+    try {
+      const response = await axios.post('https://wind-insights.onrender.com/dfa', dados);
+      setRespostaApiDFA(response.data);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
     }
@@ -110,8 +117,8 @@ export default function CSVReader() {
       return true; // Inclui a linha se passar em todos os filtros
     }) : csvData;
 
-  const filteredSuavizada = respostaApi && (startDate || endDate || speedRange)
-    ? respostaApi.filter(row => {
+  const filteredSuavizada = respostaApiSS && (startDate || endDate || speedRange)
+    ? respostaApiSS.filter(row => {
       const dateStr = row[0];
       const value = parseFloat(row[1]);
       const rowDate = new Date(dateStr);
@@ -130,12 +137,12 @@ export default function CSVReader() {
       if (isNaN(value) || value < speedRange[0] || value > speedRange[1]) return false;
       return true;
     })
-    : respostaApi;
+    : respostaApiSS;
 
   useEffect(() => {
     console.log("Intervalo selecionado: ", startDate, " até ", endDate);
     console.log("Dados filtrados:", displayedData);
-    console.log('Dados Recebidos da API:', respostaApi);
+    console.log('Dados Recebidos da API:', respostaApiSS);
   }, [startDate, endDate, speedRange, displayedData]);
 
   const extrairPartesTimestamp = (timestamp) => {
@@ -203,7 +210,11 @@ export default function CSVReader() {
     if (rawRows && columnMap) {
       const dados = normalizarDados(rawRows, columnMap);
       setCsvData(dados);
-      enviarParaApi(dados);
+
+      Promise.all([
+        enviarParaApiSS(dados),
+        enviarParaApiDFA(dados)
+      ]);
     }
   }, [rawRows, columnMap]);
 
@@ -280,41 +291,9 @@ export default function CSVReader() {
         onUploadAccepted={(results) => {
           setColumnMap(null);
           setCsvData(null);
-          setRespostaApi(null);
+          setRespostaApiSS(null);
+          setRespostaApiDFA(null);
 
-          // let linhas = results.data.filter(r => r.length);
-
-          // // Limpa cada campo de qualquer aspas ou backslashes residuais
-          // linhas = linhas.map(linha => {
-          //   // Se a linha veio inteira como string única (fallback)
-          //   if (linha.length === 1 && typeof linha[0] === "string") {
-          //     let texto = linha[0].trim().replace(/^\uFEFF/, "");
-          //     if (texto.startsWith('"') && texto.endsWith('"')) {
-          //       texto = texto.slice(1, -1);
-          //     }
-          //     texto = texto.replace(/""/g, '"');
-          //     linha = texto.split(",");
-          //   }
-
-          //   // Limpa cada campo individualmente (aspas simples, duplas, backslashes)
-          //   return linha.map(campo =>
-          //     String(campo)
-          //       .replace(/\\"/g, "")   // remove \"
-          //       .replace(/^"|"$/g, "") // remove aspas no início/fim
-          //       .trim()
-          //   );
-          // });
-
-          // const primeiraLinha = linhas[0];
-          // const pareceHeader = primeiraLinha.some(v => isNaN(parseFloat(v)));
-
-          // if (pareceHeader) {
-          //   setHeaders(primeiraLinha);
-          //   setRawRows(linhas.slice(1));
-          // } else {
-          //   setHeaders(primeiraLinha.map((_, i) => `Coluna ${i + 1}`));
-          //   setRawRows(linhas);
-          // }
           const rawLines = results.data
             .filter(r => r.length > 0)
             .map(r => {
@@ -408,7 +387,8 @@ export default function CSVReader() {
                   setHeaders(null);
                   setRawRows(null);
                   setColumnMap(null);
-                  setRespostaApi(null);
+                  setRespostaApiSS(null);
+                  setRespostaApiDFA(null);
                   setStartDate(null);
                   setEndDate(null);
                   setSpeedRange([0, 20]);
@@ -739,9 +719,9 @@ export default function CSVReader() {
                   <SpiralChart data={displayedData} />
                 </div>
               </div>
-              
+
               <div className="chart-line">
-                <DFAChart data={displayedData} />
+                <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
               </div>
 
               <div style={{ marginTop: "18px", textAlign: "center" }}>
