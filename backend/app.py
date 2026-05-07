@@ -10,7 +10,7 @@ CORS(app)
 def index():
     return "It's Working!"
 
-@app.route('/processar', methods=['POST'])
+@app.route('/processarSS', methods=['POST'])
 def processar_dados():
     try:
         dados = request.get_json()
@@ -31,7 +31,7 @@ def processar_dados():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-@app.route('/dfa', methods=['POST'])
+@app.route('/processarDFA', methods=['POST'])
 def calcular_dfa():
     # Baseado no repositório fathon (https://github.com/stfbnc/fathon)
     try:
