@@ -1,16 +1,17 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import "../Styles/dfa.css";
 
 const REGIMES = [
-  { max: 0.30, label: "Antipersistente", color: "#E24B4A" },
-  { max: 0.45, label: "Lev. antipersistente", color: "#EF9F27" },
-  { max: 0.55, label: "Ruído branco", color: "#888780" },
-  { max: 0.75, label: "Persistente", color: "#1D9E75" },
-  { max: 0.90, label: "Fortemente persistente", color: "#185FA5" },
-  { max: 1.10, label: "Ruído rosa (1/f)", color: "#7F77DD" },
-  { max: 1.50, label: "Não estacionário", color: "#D85A30" },
-  { max: 99, label: "Passeio Browniano", color: "#D4537E" },
+  { max: 0.30, label: "Antipersistente", color: "#E24B4A", description: "Série com forte reversão à média. Flutuações tendem a se corrigir rapidamente." },
+  { max: 0.45, label: "Lev. antipersistente", color: "#EF9F27", description: "Leve tendência de reversão à média. Pequenas oscilações se autocorrigem." },
+  { max: 0.55, label: "Ruído branco", color: "#888780", description: "Série sem memória temporal. Cada valor é independente do anterior." },
+  { max: 0.75, label: "Persistente", color: "#1D9E75", description: "Série com memória de longo prazo. Tendências passadas influenciam valores futuros." },
+  { max: 0.90, label: "Fortemente persistente", color: "#185FA5", description: "Alta persistência temporal. Padrões de longo prazo são bem definidos." },
+  { max: 1.10, label: "Ruído rosa (1/f)", color: "#7F77DD", description: "Estrutura escalar típica de sistemas turbulentos e atmosféricos." },
+  { max: 1.50, label: "Não estacionário", color: "#D85A30", description: "Série com tendência ou variância crescente. Pode indicar não estacionariedade." },
+  { max: 99, label: "Passeio Browniano", color: "#D4537E", description: "Comportamento de passeio aleatório. Série fortemente não estacionária." },
 ];
 
 function getRegime(alpha) {
@@ -21,7 +22,6 @@ export default function DFAChart({ data, totalRegistros }) {
 
   const result = useMemo(() => {
     if (!data || !data.ln_n || data.ln_n.length < 4) return null;
-
     return {
       ln_n: data.ln_n,
       ln_F: data.ln_F,
@@ -33,42 +33,20 @@ export default function DFAChart({ data, totalRegistros }) {
 
   const options = useMemo(() => {
     if (!result) return null;
-
     return {
-      chart: {
-        type: "scatter",
-        backgroundColor: "#fff",
-        height: 400,
-      },
-
-      title: {
-        text: "DFA 1D (fathon) — ln(F) vs ln(n)",
-      },
-
-      xAxis: {
-        title: { text: "ln(n)" },
-        gridLineWidth: 1,
-      },
-
-      yAxis: {
-        title: { text: "ln(F(n))" },
-        gridLineWidth: 1,
-      },
-
+      chart: { type: "scatter", backgroundColor: "#fff", height: 400, width: null },
+      title: { text: "DFA 1D" },
+      xAxis: { title: { text: "ln(n)" }, gridLineWidth: 1 },
+      yAxis: { title: { text: "ln(F(n))" }, gridLineWidth: 1 },
       tooltip: {
         formatter: function () {
-          return `<b>ln(n):</b> ${this.x.toFixed(3)}<br/>
-                  <b>ln(F):</b> ${this.y.toFixed(3)}`;
+          return `<b>ln(n):</b> ${this.x.toFixed(3)}<br/><b>ln(F):</b> ${this.y.toFixed(3)}`;
         },
       },
 
       plotOptions: {
-        scatter: {
-          marker: { radius: 4 },
-        },
-        line: {
-          marker: { enabled: false },
-        },
+        scatter: { marker: { radius: 4 } },
+        line: { marker: { enabled: false } },
       },
 
       series: [
@@ -94,50 +72,67 @@ export default function DFAChart({ data, totalRegistros }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#0742e6" }}>
-          DFA 1D — Implementação Fiel ao fathon
-        </div>
-        <div style={{ fontSize: 13, color: "#888" }}>
-          ln(F(n)) vs ln(n)
-        </div>
-      </div>
-
       {result ? (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: 10, marginBottom: 20 }}>
-            <div style={{ background: "#f7faff", padding: 12 }}>
-              <div>α (H)</div>
-              <div style={{ fontSize: 22, fontWeight: 700 }}>{result.alpha.toFixed(3)}</div>
-              <div style={{ color: regime.color }}>{regime.label}</div>
+          <div className="dfa-wrapper">
+            {/* Cards Laterais */}
+            <div className="dfa-cards">
+              <div className="dfa-card">
+                <div className="dfa-card-label">Expoente α (Hurst)</div>
+                <div className="dfa-card-value">{result.alpha.toFixed(3)}</div>
+              </div>
+
+              <div className="dfa-card">
+                <div className="dfa-card-label">Regressão (R²)</div>
+                <div className="dfa-card-value">{result.r2.toFixed(3)}</div>
+              </div>
+
+              <div className="dfa-card">
+                <div className="dfa-card-label">Nº de Registros</div>
+                <div className="dfa-card-value">{totalRegistros || "—"}</div>
+              </div>
+
+              <div className="dfa-card">
+                <div className="dfa-card-label">Pontos no DFA</div>
+                <div className="dfa-card-value">{result.ln_n.length}</div>
+              </div>
             </div>
 
-            <div style={{ background: "#f7faff", padding: 12 }}>
-              <div>R²</div>
-              <div style={{ fontSize: 22 }}>{result.r2.toFixed(3)}</div>
-            </div>
-
-            <div style={{ background: "#f7faff", padding: 12 }}>
-              <div>Registros</div>
-              <div style={{ fontSize: 22 }}>{totalRegistros || "—"}</div>
-            </div>
-
-            <div style={{ background: "#f7faff", padding: 12 }}>
-              <div>Pontos DFA</div>
-              <div style={{ fontSize: 22 }}>{result.ln_n.length}</div>
+            {/* Gráfico */}
+            <div className="dfa-chart">
+              <HighchartsReact highcharts={Highcharts} options={options} />
             </div>
           </div>
 
-          <HighchartsReact highcharts={Highcharts} options={options} />
-
-          <div style={{ marginTop: 16 }}>
-            <strong>Regime:</strong>{" "}
-            <span style={{ color: regime.color }}>{regime.label}</span>
+          <div className="dfa-info">
+            {/* Card Inferior */}
+            <div className="dfa-info-header">
+              <strong>Velocidade</strong> — Regime detectado:{" "}
+              <span
+                className="dfa-regime-badge"
+                style={{
+                  background: regime.color + "22",
+                  color: regime.color,
+                  border: `1px solid ${regime.color}`,
+                }}
+              >
+                {regime.label}
+              </span>
+            </div>
+            <div className="dfa-info-description">{regime.description}</div>
+            <div>
+              <strong>Guia:</strong>{" "}
+              α &lt; 0.5 → reversão à média &nbsp;|&nbsp;
+              α ≈ 0.5 → ruído branco &nbsp;|&nbsp;
+              0.5 &lt; α &lt; 1 → persistente &nbsp;|&nbsp;
+              α ≈ 1 → ruído rosa &nbsp;|&nbsp;
+              α &gt; 1 → série não estacionária
+            </div>
           </div>
         </>
       ) : (
-        <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
-          {!data ? "Carregue dados." : "Dados insuficientes para DFA."}
+        <div className="dfa-empty">
+          {!data ? "Nenhum CSV carregado." : "Dados insuficientes para DFA."}
         </div>
       )}
     </div>

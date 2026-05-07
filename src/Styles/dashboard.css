@@ -53,12 +53,13 @@
 /* SerieSpeedLine abaixo dos outros elementos */
 .chart-line {
     flex: 1;
-    width: 98%;
+    width: 100%;
     border: 1px;
     padding: 12.5px;
     background: #ffffff;
     border-radius: 1%;
     border: blue solid 1px;
+    box-sizing: border-box;
     /* background: linear-gradient(90deg, rgba(90,111,214,1) 0%, rgba(135,163,255,0.7987570028011204) 18%); */
 }
 
