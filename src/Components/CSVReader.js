@@ -61,16 +61,16 @@ export default function CSVReader() {
   const [readerKey, setReaderKey] = useState(0);
   const [hasHeader, setHasHeader] = useState(true);
 
-  useEffect(() => {
-    console.log("CSV atualizado:", csvData);
-  }, [csvData]);
+  // useEffect(() => {
+  //   console.log("CSV atualizado:", csvData);
+  // }, [csvData]);
 
   {/* Processamento Série Suavizada */}
   const enviarParaApiSS = async (dados) => {
     try {
       // const response = await axios.post('http://localhost:5000/processar', dados);
-      const response = await axios.post('https://dashboard-backend-vf4t.onrender.com/processar', dados);
-      setRespostaApiSS(response.data); // Armazena a resposta da API no estado
+      const response = await axios.post('https://wind-insights.onrender.com/processarSS', dados);
+      setRespostaApiSS(response.data);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
     }
@@ -79,7 +79,7 @@ export default function CSVReader() {
   {/* Processamento DFA */}
   const enviarParaApiDFA = async (dados) => {
     try {
-      const response = await axios.post('https://wind-insights.onrender.com/dfa', dados);
+      const response = await axios.post('https://wind-insights.onrender.com/processarDFA', dados);
       setRespostaApiDFA(response.data);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
@@ -139,11 +139,11 @@ export default function CSVReader() {
     })
     : respostaApiSS;
 
-  useEffect(() => {
-    console.log("Intervalo selecionado: ", startDate, " até ", endDate);
-    console.log("Dados filtrados:", displayedData);
-    console.log('Dados Recebidos da API:', respostaApiSS);
-  }, [startDate, endDate, speedRange, displayedData]);
+  // useEffect(() => {
+  //   console.log("Intervalo selecionado: ", startDate, " até ", endDate);
+  //   console.log("Dados filtrados:", displayedData);
+  //   console.log('Dados Recebidos da API:', respostaApiSS);
+  // }, [startDate, endDate, speedRange, displayedData]);
 
   const extrairPartesTimestamp = (timestamp) => {
     if (!timestamp) return {};
