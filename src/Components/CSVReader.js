@@ -50,6 +50,7 @@ const styles = {
 export default function CSVReader() {
   const { CSVReader } = useCSVReader();
   const [csvData, setCsvData] = useState(null);
+  const [dfaData, setDfaData] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [speedRange, setSpeedRange] = useState([0, 20]); // Intervalo inicial de velocidade ajustado
@@ -83,6 +84,16 @@ export default function CSVReader() {
       setRespostaApiDFA(response.data);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
+    }
+  };
+
+  const calcularDFA = async (dados) => {
+    try {
+      const response = await axios.post('https://wind-insights.onrender.com/dfa', dados);
+      console.log('Resposta DFA:', response.data);
+      setDfaData(response.data);
+    } catch (error) {
+      console.error('Erro ao calcular DFA:', error);
     }
   };
 

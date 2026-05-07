@@ -43,10 +43,12 @@ export default function DFAChart({ data, totalRegistros }) {
           return `<b>ln(n):</b> ${this.x.toFixed(3)}<br/><b>ln(F):</b> ${this.y.toFixed(3)}`;
         },
       },
+
       plotOptions: {
         scatter: { marker: { radius: 4 } },
         line: { marker: { enabled: false } },
       },
+
       series: [
         {
           name: "Dados (ln F)",
