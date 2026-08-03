@@ -720,9 +720,9 @@ export default function CSVReader() {
                 </div>
               </div>
 
-              <div className="chart-line">
+              {/* <div className="chart-line">
                 <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
-              </div>
+              </div> */}
 
               <div style={{ marginTop: "18px", textAlign: "center" }}>
                 <div style={{ marginBottom: "8px", fontSize: "1.08rem", color: "#0742e6", fontWeight: 500 }}>
