@@ -12,7 +12,7 @@ if (typeof Exporting === "function") {
   Exporting(Highcharts);
 }
 
-const HeatMap = ({ data }) => {
+const HeatMapChart = ({ data }) => {
   const [chartData, setChartData] = useState([]);
   const [minSpeed, setMinSpeed] = useState(2); // Velocidade mínima padrão
   const [maxSpeed, setMaxSpeed] = useState(15); // Velocidade máxima padrão
@@ -155,11 +155,4 @@ const HeatMap = ({ data }) => {
   );
 };
 
-export default HeatMap;
-//   );
-// };
-
-// export default HeatMap;
-
-// cuidado
-
+export default HeatMapChart;

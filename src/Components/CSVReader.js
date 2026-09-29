@@ -8,14 +8,16 @@ import axios from 'axios';
 import Inicio from "./Inicio";
 import SerieSpeed from "./SerieSpeed";
 import SerieDirection from "./SerieDirection";
-import WindRose from './WindRose';
-import HeatMap from './HeatMap';
-import ChartHistogram from "./ChartHistogram";
+import WindRoseChart from './WindRoseChart';
+import HeatMapChart from './HeatMapChart';
+import HistogramChart from "./HistogramChart";
 import SpiralChart from "./SpiralChart"
 import SerieSuavizada from "./SerieSuavizada";
 import StickPlot from "./StickPlot";
 import DFAChart from "./DFAChart";
 import ColumnMapper from "./ColumnMapper";
+import ProfileChart from "./ProfileChart";
+import GranularityChart from "./GranularityChart";
 
 import '../App.css';
 import '../Styles/dashboard.css';
@@ -60,12 +62,9 @@ export default function CSVReader() {
   const [columnMap, setColumnMap] = useState(null);
   const [readerKey, setReaderKey] = useState(0);
   const [hasHeader, setHasHeader] = useState(true);
+  const [stationCoordinates, setStationCoordinates] = useState(null);
 
-  // useEffect(() => {
-  //   console.log("CSV atualizado:", csvData);
-  // }, [csvData]);
-
-  {/* Processamento Série Suavizada */}
+  {/* Processamento Série Suavizada */ }
   const enviarParaApiSS = async (dados) => {
     try {
       // const response = await axios.post('http://localhost:5000/processar', dados);
@@ -76,7 +75,7 @@ export default function CSVReader() {
     }
   };
 
-  {/* Processamento DFA */}
+  {/* Processamento DFA */ }
   const enviarParaApiDFA = async (dados) => {
     try {
       const response = await axios.post('https://wind-insights.onrender.com/processarDFA', dados);
@@ -138,12 +137,6 @@ export default function CSVReader() {
       return true;
     })
     : respostaApiSS;
-
-  // useEffect(() => {
-  //   console.log("Intervalo selecionado: ", startDate, " até ", endDate);
-  //   console.log("Dados filtrados:", displayedData);
-  //   console.log('Dados Recebidos da API:', respostaApiSS);
-  // }, [startDate, endDate, speedRange, displayedData]);
 
   const extrairPartesTimestamp = (timestamp) => {
     if (!timestamp) return {};
@@ -277,6 +270,21 @@ export default function CSVReader() {
     return { headers: headerRow, rows: dataRows, hasHeaderDetected: pareceHeader };
   };
 
+  const handleAbrirMapa3D = () => {
+    if (!stationCoordinates) return;
+
+    try {
+      const payload = {
+        data: displayedData,
+        coordinates: stationCoordinates
+      };
+      localStorage.setItem("windRose3DData", JSON.stringify(payload));
+      window.open("/wind-rose-map", "_blank");
+    } catch (error) {
+      console.error("Erro ao preparar dados para o mapa 3D:", error);
+    }
+  };
+
   return (
     <>
       <CSVReader
@@ -293,6 +301,7 @@ export default function CSVReader() {
           setCsvData(null);
           setRespostaApiSS(null);
           setRespostaApiDFA(null);
+          setStationCoordinates(null);
 
           const rawLines = results.data
             .filter(r => r.length > 0)
@@ -387,6 +396,7 @@ export default function CSVReader() {
                   setHeaders(null);
                   setRawRows(null);
                   setColumnMap(null);
+                  setStationCoordinates(null);
                   setRespostaApiSS(null);
                   setRespostaApiDFA(null);
                   setStartDate(null);
@@ -456,7 +466,10 @@ export default function CSVReader() {
               setRawRows(allRows);
             }
           }}
-          onConfirm={setColumnMap}
+          onConfirm={(mapping, coordinates) => {
+            setColumnMap(mapping);
+            setStationCoordinates(coordinates);
+          }}
         />
       )}
 
@@ -702,27 +715,39 @@ export default function CSVReader() {
                 <StickPlot data={displayedData} />
               </div>
 
+              <div className="chart-line">
+                <ProfileChart data={displayedData} />
+              </div>
+
+              <div className="chart-line">
+                <GranularityChart data={displayedData} />
+              </div>
+
               <div className="chart-top">
                 <div className="chart-column">
-                  <HeatMap data={displayedData} />
+                  <HeatMapChart data={displayedData} />
                 </div>
                 <div className="new-chart">
-                  <ChartHistogram data={displayedData} />
+                  <HistogramChart data={displayedData} />
                 </div>
               </div>
 
               <div className="chart-top">
                 <div className="wind-rose">
-                  <WindRose data={displayedData} />
+                  <WindRoseChart
+                    data={displayedData}
+                    onOpenMap={handleAbrirMapa3D}
+                    mapDisabled={!stationCoordinates}
+                  />
                 </div>
                 <div className="chart-column">
                   <SpiralChart data={displayedData} />
                 </div>
               </div>
 
-              {/* <div className="chart-line">
+              <div className="chart-line">
                 <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
-              </div> */}
+              </div>
 
               <div style={{ marginTop: "18px", textAlign: "center" }}>
                 <div style={{ marginBottom: "8px", fontSize: "1.08rem", color: "#0742e6", fontWeight: 500 }}>

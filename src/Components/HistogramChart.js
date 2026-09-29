@@ -14,7 +14,7 @@ if (typeof HistogramBellCurve === "function") {
     HistogramBellCurve(Highcharts);
 }
 
-function ChartHistogram({ data }) {
+function HistogramChart({ data }) {
     const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
@@ -111,5 +111,5 @@ function ChartHistogram({ data }) {
     );
 }
 
-export default ChartHistogram;
+export default HistogramChart;
 
