@@ -3,6 +3,8 @@ import React from "react";
 export default function ColumnMapper({ headers, hasHeaderDetected, rawRows, onHeaderToggle, onConfirm }) {
     const [mapping, setMapping] = React.useState({});
     const [userHasHeader, setUserHasHeader] = React.useState(hasHeaderDetected ?? true);
+    const [latInput, setLatInput] = React.useState("");
+    const [lonInput, setLonInput] = React.useState("");
 
     const separateTimeFields = ["year", "month", "day", "hour", "minute"];
     const windMapped = mapping.ws100 !== undefined && mapping.wdir100 !== undefined;
@@ -20,6 +22,15 @@ export default function ColumnMapper({ headers, hasHeaderDetected, rawRows, onHe
         time: timestampMapped || hasFullSeparateTime,
     };
     const isValid = validation.wind && validation.time;
+
+    // Coordenada é opcional — não entra na validação do botão Confirmar,
+    // só é repassada pro componente pai se estiver preenchida corretamente.
+    const stationCoordinates = (() => {
+        const lat = parseFloat(String(latInput).replace(",", "."));
+        const lon = parseFloat(String(lonInput).replace(",", "."));
+        if (isNaN(lat) || isNaN(lon)) return null;
+        return [lat, lon];
+    })();
 
     const campos = [
         {
@@ -358,10 +369,103 @@ export default function ColumnMapper({ headers, hasHeaderDetected, rawRows, onHe
                         {separateFields.map(renderSelect)}
                     </div>
                 </div>
+
+                {/* ── Divisor ── */}
+                <div
+                    style={{
+                        borderTop: "1.5px dashed #b3c8f9",
+                        margin: "10px 0 10px 0",
+                    }}
+                />
+
+                {/* ── Coordenada do posto eólico (opcional) ── */}
+                <div>
+                    <div
+                        style={{
+                            color: "#0742e6",
+                            fontWeight: 700,
+                            textAlign: "left",
+                            fontSize: 14,
+                            marginBottom: 6,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                        }}
+                    >
+                        Localização — opcional, habilita a visualização 3D no mapa:
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 10,
+                            background: stationCoordinates ? "#e8f5e9" : "#f7faff",
+                            border: `1.5px solid ${stationCoordinates ? "#a5d6a7" : "#b3c8f9"}`,
+                            borderRadius: 10,
+                            padding: "10px 14px",
+                            transition: "background 0.2s, border 0.2s",
+                        }}
+                    >
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                            <label
+                                style={{
+                                    minWidth: 230,
+                                    textAlign: "left",
+                                    color: "#1a237e",
+                                    fontSize: 15,
+                                    fontWeight: 600,
+                                }}
+                            >
+                                Coordenada do posto eólico
+                            </label>
+
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Latitude (ex: -22.42)"
+                                value={latInput}
+                                onChange={(e) => setLatInput(e.target.value)}
+                                style={{
+                                    background: "#f7faff",
+                                    border: "1.5px solid #b3c8f9",
+                                    borderRadius: 10,
+                                    boxShadow: "0 2px 12px #e3e9f7",
+                                    padding: "4px 8px",
+                                    fontSize: 14,
+                                    minWidth: 150,
+                                    color: "#1a237e",
+                                    outline: "none",
+                                }}
+                            />
+
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Longitude (ex: -45.45)"
+                                value={lonInput}
+                                onChange={(e) => setLonInput(e.target.value)}
+                                style={{
+                                    background: "#f7faff",
+                                    border: "1.5px solid #b3c8f9",
+                                    borderRadius: 10,
+                                    boxShadow: "0 2px 12px #e3e9f7",
+                                    padding: "4px 8px",
+                                    fontSize: 14,
+                                    minWidth: 150,
+                                    color: "#1a237e",
+                                    outline: "none",
+                                }}
+                            />
+                        </div>
+
+                        <span style={{ fontSize: 13, color: "#5b6b9a", fontStyle: "italic", textAlign: "left" }}>
+                            Sem essa informação, o botão "Ver no mapa" (visualização 3D) fica desabilitado — mas você pode confirmar o mapeamento normalmente sem preencher.
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <button
-                onClick={() => onConfirm(mapping)}
+                onClick={() => onConfirm(mapping, stationCoordinates)}
                 disabled={!isValid}
                 style={{
                     background: "linear-gradient(90deg, #0742e6 60%, #1a237e 100%)",

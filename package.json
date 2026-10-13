@@ -7,6 +7,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.0.2",
     "axios": "^1.8.4",
+    "cesium": "^1.145.0",
     "chart.js": "^4.4.7",
     "cra-template": "1.2.0",
     "d3": "^7.9.0",
@@ -26,6 +27,8 @@
     "web-vitals": "^4.2.4"
   },
   "scripts": {
+    "prestart": "node scripts/copy-cesium-assets.js",
+    "prebuild": "node scripts/copy-cesium-assets.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -48,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "fs-extra": "^11.4.0"
   }
 }
