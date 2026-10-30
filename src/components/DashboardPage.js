@@ -7,11 +7,12 @@ import Tabs from "./ui/Tabs";
 import PageTitleBar from "./ui/PageTitleBar";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
+import TabNav from "./ui/TabNav";
+
 import Inicio from "./home/Inicio";
 import ColumnMapper from "./home/ColumnMapper";
 import Filters from "./tabMain/filters/Filters";
 import Analise from "./tabPotential/Analise";
-
 import SerieSpeed from "./tabMain/SerieSpeed";
 import SerieSuavizada from "./tabMain/SerieSuavizada";
 import SerieDirection from "./tabMain/SerieDirection";
@@ -19,11 +20,10 @@ import StickPlot from "./tabMain/StickPlot";
 import ProfileChart from "./tabMain/ProfileChart";
 import GranularityChart from "./tabMain/GranularityChart";
 import WindRoseChart from "./tabMain/WindRoseChart";
-
-import HeatMapChart from "../components/HeatMapChart";
-import HistogramChart from "../components/HistogramChart";
-import SpiralChart from "../components/SpiralChart";
-import DFAChart from "../components/DFAChart";
+import HeatMapChart from "./tabMain/HeatMapChart";
+import HistogramChart from "./tabMain/HistogramChart";
+import SpiralChart from "./tabMain/SpiralChart";
+import DFAChart from "./tabStatistics/DFAChart";
 
 const TABS = [
   { key: "principal", label: "Principal" },
@@ -370,6 +370,11 @@ export default function DashboardPage() {
     setActiveTab("principal");
   };
 
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    window.scrollTo({ top: 0 });
+  };
+
   // Highcharts e Plotly recalculam tamanho dos gráficos ao trocar de tab.
   useEffect(() => {
     window.dispatchEvent(new Event("resize"));
@@ -381,7 +386,7 @@ export default function DashboardPage() {
     startDate || endDate || speedRange[0] !== 0 || speedRange[1] !== 20;
 
   return (
-    <div className="min-h-screen bg-page font-sans text-slate-800">
+    <div className="min-h-screen">
       <Header showHome={hasData} onHome={resetToHome} />
 
       {/* ───────── HOME (sem dados) ───────── */}
@@ -432,7 +437,7 @@ export default function DashboardPage() {
       {/* ───────── DASHBOARD (dados carregados) ───────── */}
       {hasData && (
         <>
-          <Tabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+          <Tabs tabs={TABS} active={activeTab} onChange={handleTabChange} />
 
           <main className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6">
             <div className="mb-4">
@@ -518,6 +523,8 @@ export default function DashboardPage() {
                 <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
               </Card>
             </TabPanel>
+
+            <TabNav tabs={TABS} active={activeTab} onChange={handleTabChange} />
           </main>
         </>
       )}

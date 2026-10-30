@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import "../Styles/dfa.css";
+import "./dfa.css";
 
 const REGIMES = [
   { max: 0.30, label: "Antipersistente", color: "#E24B4A", description: "Série com forte reversão à média. Flutuações tendem a se corrigir rapidamente." },

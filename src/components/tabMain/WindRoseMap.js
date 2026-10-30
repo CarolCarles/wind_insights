@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-import { processWindRoseData } from "./WindRoseUtils";
+import { processWindRoseData } from "../../components/tabMain/WindRoseUtils";
 
 const COLORS = [
   "#CAF0F8",
