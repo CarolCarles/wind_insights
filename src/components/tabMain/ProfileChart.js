@@ -76,7 +76,7 @@ const VIEW_CONFIG = {
         bucketCount: 24,
         bucketOffset: 0,
         xAxisTitle: "Hora do dia",
-        chartTitle: "Perfil Horário de Velocidade do Vento",
+        chartTitle: "Ciclo Diurno da Velocidade do Vento",
         buttonLabel: "Perfil Horário"
     },
     monthly: {
@@ -84,7 +84,7 @@ const VIEW_CONFIG = {
         bucketCount: 12,
         bucketOffset: 1,
         xAxisTitle: "Mês",
-        chartTitle: "Perfil Mensal de Velocidade do Vento",
+        chartTitle: "Ciclo Anual da Velocidade do Vento",
         buttonLabel: "Perfil Mensal"
     }
 };
@@ -105,7 +105,7 @@ export default function ProfileChart({ data }) {
             backgroundColor: "transparent",
             style: { fontFamily: "Inter, Arial, sans-serif" }
         },
-        title: '',
+        title: { text: config.chartTitle },
         xAxis: {
             title: { text: config.xAxisTitle },
             tickInterval: 1,
@@ -177,7 +177,7 @@ export default function ProfileChart({ data }) {
     );
 
     return (
-        <Card title={config.chartTitle} action={botoes}>
+        <Card action={botoes}>
             {meanSeries.length > 0 ? (
                 <HighchartsReact highcharts={Highcharts} options={options} />
             ) : (

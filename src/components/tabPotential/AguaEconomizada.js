@@ -1,7 +1,7 @@
 import React from "react";
 import StatCard from "../ui/StatCard";
 
-function AguaEconomizada({ data, raioTurbina = 40, eficiencia = 0.4 }) {
+function AguaEconomizada({ data, raioTurbina = 40, eficiencia = 0.4, limiteVelocidade = 4 }) {
   if (!Array.isArray(data) || data.length === 0) {
     return (
       <StatCard title="Água Economizada">
@@ -18,9 +18,9 @@ function AguaEconomizada({ data, raioTurbina = 40, eficiencia = 0.4 }) {
   // Calcula energia total gerada (em Wh)
   const energiaTotal = data.reduce((total, row) => {
     const velocidade = parseFloat(row.ws100);
-    if (velocidade > 4) {
+    if (velocidade > limiteVelocidade) {
       const potencia = 0.5 * densidadeAr * area * Math.pow(velocidade, 3) * eficiencia;
-      const energia = potencia * (10 / 60); // energia em Wh
+      const energia = potencia * (10 / 60);
       return total + energia;
     }
     return total;

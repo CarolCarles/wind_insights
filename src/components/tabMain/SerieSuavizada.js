@@ -47,19 +47,19 @@ function SerieSuavizada({ data }) {
     }), [chartData]);
 
     return (
-        <Card title="Série Suavizada da Velocidade do Vento">
+        <Card>
+            {chartData.length > 0 ? (
+                <HighchartsReact highcharts={Highcharts} options={options} />
+            ) : (
+                <p className="py-6 text-center text-slate-500">Carregando gráfico...</p>
+            )}
+
             <InfoBox>
                 <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.<br />
                 Selecione uma área do gráfico para dar zoom.<br />
                 Clique em "Reset Zoom" para voltar à visualização completa.<br />
                 <i className="text-xs text-brand"> ** Por conta do tamanho do CSV e dos cálculos necessários, este gráfico pode demorar a carregar.</i>
             </InfoBox>
-
-            {chartData.length > 0 ? (
-                <HighchartsReact highcharts={Highcharts} options={options} />
-            ) : (
-                <p className="py-6 text-center text-slate-500">Carregando gráfico...</p>
-            )}
         </Card>
     );
 }

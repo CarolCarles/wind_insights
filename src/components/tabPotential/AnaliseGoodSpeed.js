@@ -39,7 +39,12 @@ function AnaliseGoodSpeed({ data, limiteVelocidade = 4 }) {
 
     setChartOptions({
       chart: { type: "column", zoomType: "x" },
-      title: { text: `   ` },
+      title: {
+        text: `Tempo por Dia com Velocidade maior que ${limiteVelocidade} m/s`,
+      },
+      subtitle: {
+        text: `Tempo total com velocidade maior que ${limiteVelocidade} m/s = ${formattedTotalTime}`,
+      },
       xAxis: {
         categories: chartData.map((item) => item.date),
         title: { text: "Data" },
@@ -59,24 +64,13 @@ function AnaliseGoodSpeed({ data, limiteVelocidade = 4 }) {
   }, [data, limiteVelocidade]);
 
   return (
-    <Card
-      title={`Tempo por Dia com Velocidade maior que ${limiteVelocidade} m/s`}
-      className="h-full"
-    >
-      <p className="mb-3 text-[15px] font-medium text-slate-800">
+    <Card className="h-full">
+      {/* <p className="mb-3 text-[15px] text-center font-medium text-slate-800">
         <span className="text-brand">
           Tempo total com velocidade maior que {limiteVelocidade} m/s =
         </span>{" "}
         <b className="text-brand">{totalTime}</b>
-      </p>
-
-      <InfoBox>
-        <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.
-        <br />
-        Selecione uma área do gráfico para dar zoom.
-        <br />
-        Clique em "Reset Zoom" para voltar à visualização completa.
-      </InfoBox>
+      </p> */}
 
       {chartOptions ? (
         <HighchartsReact highcharts={Highcharts} options={chartOptions} />
@@ -85,6 +79,14 @@ function AnaliseGoodSpeed({ data, limiteVelocidade = 4 }) {
           Nenhum dado disponível para velocidades acima de {limiteVelocidade} m/s.
         </p>
       )}
+
+      <InfoBox>
+        <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.
+        <br />
+        Selecione uma área do gráfico para dar zoom.
+        <br />
+        Clique em "Reset Zoom" para voltar à visualização completa.
+      </InfoBox>
     </Card>
   );
 }

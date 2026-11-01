@@ -33,7 +33,7 @@ function SerieDirection({ data }) {
             zoomType: 'x',
         },
         title: {
-            text: " ",
+            text: "Série Temporal da Direção do Vento",
         },
         colors: ['#000'],
         xAxis: {
@@ -61,18 +61,18 @@ function SerieDirection({ data }) {
     };
 
     return (
-        <Card title="Série Temporal da Direção do Vento">
-            <InfoBox>
-                <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.<br />
-                Selecione uma área do gráfico para dar zoom.<br />
-                Clique em "Reset Zoom" para voltar à visualização completa.
-            </InfoBox>
-
+        <Card>
             {chartData.length > 0 ? (
                 <HighchartsReact highcharts={Highcharts} options={options} />
             ) : (
                 <p className="py-6 text-center text-slate-500">Carregando gráfico...</p>
             )}
+
+             <InfoBox>
+                <b>Dica:</b> Passe o mouse sobre o gráfico para ver os valores de cada ponto.<br />
+                Selecione uma área do gráfico para dar zoom.<br />
+                Clique em "Reset Zoom" para voltar à visualização completa.
+            </InfoBox>
         </Card>
     );
 }

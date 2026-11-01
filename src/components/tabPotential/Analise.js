@@ -104,9 +104,9 @@ function Analise({ data }) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <CasasAbastecidas data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} />
-          <ArvoresSalvas data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} />
-          <AguaEconomizada data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} />
+          <CasasAbastecidas data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} limiteVelocidade={limiteVelocidade} />
+          <ArvoresSalvas data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} limiteVelocidade={limiteVelocidade} />
+          <AguaEconomizada data={csvData} raioTurbina={raioTurbina} eficiencia={eficiencia} limiteVelocidade={limiteVelocidade} />
 
           {/* Dados utilizados nos cálculos: logo abaixo dos indicadores */}
           <Card title="Dados utilizado para realizar os cálculos:">

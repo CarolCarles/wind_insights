@@ -6,7 +6,7 @@ import React from "react";
 export default function InfoBox({ children, className = "" }) {
   return (
     <div
-      className={`mb-3 ml-auto w-fit max-w-full rounded-lg border border-brand-border bg-brand-soft px-4 py-2.5 text-right text-sm text-brand ${className}`}
+      className={`mt-3 ml-auto w-fit max-w-full rounded-lg border border-brand-border bg-brand-soft px-4 py-2.5 text-right text-sm text-brand ${className}`}
     >
       {children}
     </div>

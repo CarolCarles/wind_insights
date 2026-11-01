@@ -3,6 +3,7 @@ import Plot from "react-plotly.js";
 
 import Card from "../ui/Card";
 import InfoBox from "../ui/InfoBox";
+import { CHART_FONT_FAMILY } from "../ChartTheme";
 
 // Função para calcular média vetorial da direção
 function mediaDirecao(direcoes, velocidades) {
@@ -140,7 +141,11 @@ function StickPlot({ data }) {
   const plotData = [...lines, ...arrows];
 
   const layout = {
-    title: "Stick Plot - Média por Hora",
+    font: { family: CHART_FONT_FAMILY },
+    title: {
+      text: "<b>Stick Plot - Média por Hora</b>",
+      font: { size: 19, color: "#333333" }
+    },
     xaxis: {
       title: 'Hora',
       showgrid: false,
@@ -161,13 +166,7 @@ function StickPlot({ data }) {
   };
 
   return (
-    <Card title="Stick Plot - Média por Hora">
-      <InfoBox>
-        <b>Dica:</b> Passe o mouse sobre os vetores para ver os valores de cada ponto.<br />
-        Selecione uma área do gráfico para dar zoom.<br />
-        Dê dois cliques na tela para voltar à visualização completa.
-      </InfoBox>
-
+    <Card>
       <div>
         <Plot
           data={plotData}
@@ -177,7 +176,7 @@ function StickPlot({ data }) {
         />
       </div>
 
-      <div className="mt-4 flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-4">
         <button
           type="button"
           onClick={() => setPage(p => Math.max(p - 1, 0))}
@@ -214,6 +213,12 @@ function StickPlot({ data }) {
       <div className="mt-1 text-center text-sm text-slate-700">
         Página <b>{page + 1}</b> de <b>{totalPages}</b>
       </div>
+
+      <InfoBox>
+        <b>Dica:</b> Passe o mouse sobre os vetores para ver os valores de cada ponto.<br />
+        Selecione uma área do gráfico para dar zoom.<br />
+        Dê dois cliques na tela para voltar à visualização completa.
+      </InfoBox>
     </Card>
   );
 }

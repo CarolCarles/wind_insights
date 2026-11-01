@@ -76,13 +76,9 @@ const HeatMapChart = ({ data }) => {
     },
     title: {
       text: "Heatmap de Velocidade",
-      align: "center",
-      x: 40,
     },
     subtitle: {
       text: "Variação de velocidade do vento ao longo do tempo",
-      align: "center",
-      x: 40,
     },
     xAxis: {
       type: "datetime",

@@ -3,6 +3,7 @@ import Plot from "react-plotly.js";
 
 import Card from "../ui/Card";
 import InfoBox from "../ui/InfoBox";
+import { CHART_FONT_FAMILY } from "../ChartTheme";
 
 // Ordem igual à da referência: N na base, NNO no topo
 const DIRECTIONS = [
@@ -163,15 +164,13 @@ export default function GranularityChart({ data }) {
   const estimatedBinsForActive = binEstimates[activeGranularity] || 0;
   const showWarning = estimatedBinsForActive > MAX_RECOMMENDED_BINS;
 
-  const TITLE = "Distribuição de Direção do Vento ao Longo do Tempo";
-
   if (!data || data.length === 0) {
     return null;
   }
 
   return (
-    <Card title={TITLE}>
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+    <Card>
+      <div className="mb-3 flex flex-wrap justify-end gap-3">
         <div className="flex items-center gap-2.5">
           <label htmlFor="granularidade" className="text-sm font-semibold text-brand">
             Granularidade:
@@ -193,19 +192,6 @@ export default function GranularityChart({ data }) {
             ))}
           </select>
         </div>
-
-        <InfoBox className="!mb-0">
-          <b>Dica:</b> Passe o mouse sobre os pontos para ver os valores.<br />
-          Selecione uma área do gráfico para dar zoom, ou use o range slider abaixo.<br />
-          Dê dois cliques na tela para voltar à visualização completa.
-          {showWarning && (
-            <>
-              <br />
-              <b>Atenção:</b> essa granularidade gera cerca de {estimatedBinsForActive} pontos
-              no eixo do tempo para o período selecionado — o gráfico pode ficar poluído.
-            </>
-          )}
-        </InfoBox>
       </div>
 
       <Plot
@@ -237,7 +223,13 @@ export default function GranularityChart({ data }) {
           },
         ]}
         layout={{
-          title: TITLE,
+          font: { family: CHART_FONT_FAMILY },
+          title: { 
+            text: "<b>Distribuição de Direção do Vento ao Longo do Tempo</b>",
+            font: {
+              size: 19, color: "#333333"
+            },
+          },
           autosize: true,
           height: 620,
           margin: { l: 60, r: 30, t: 50, b: 60 },
@@ -258,6 +250,19 @@ export default function GranularityChart({ data }) {
         style={{ width: "100%" }}
         useResizeHandler
       />
+
+      <InfoBox className="!mb-0">
+        <b>Dica:</b> Passe o mouse sobre os pontos para ver os valores.<br />
+        Selecione uma área do gráfico para dar zoom, ou use o range slider abaixo.<br />
+        Dê dois cliques na tela para voltar à visualização completa.
+        {showWarning && (
+          <>
+            <br />
+            <b>Atenção:</b> essa granularidade gera cerca de {estimatedBinsForActive} pontos
+            no eixo do tempo para o período selecionado — o gráfico pode ficar poluído.
+          </>
+        )}
+      </InfoBox>
     </Card>
   );
 }

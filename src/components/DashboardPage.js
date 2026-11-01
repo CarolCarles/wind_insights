@@ -8,11 +8,11 @@ import PageTitleBar from "./ui/PageTitleBar";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
 import TabNav from "./ui/TabNav";
+import "./ChartTheme";
 
 import Inicio from "./home/Inicio";
 import ColumnMapper from "./home/ColumnMapper";
 import Filters from "./tabMain/filters/Filters";
-import Analise from "./tabPotential/Analise";
 import SerieSpeed from "./tabMain/SerieSpeed";
 import SerieSuavizada from "./tabMain/SerieSuavizada";
 import SerieDirection from "./tabMain/SerieDirection";
@@ -23,6 +23,7 @@ import WindRoseChart from "./tabMain/WindRoseChart";
 import HeatMapChart from "./tabMain/HeatMapChart";
 import HistogramChart from "./tabMain/HistogramChart";
 import SpiralChart from "./tabMain/SpiralChart";
+import Analise from "./tabPotential/Analise";
 import DFAChart from "./tabStatistics/DFAChart";
 
 const TABS = [
