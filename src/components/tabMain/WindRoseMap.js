@@ -88,7 +88,11 @@ function buildWindRoseEntities(viewer, chartData, lat, lon, groundHeight) {
   const baseHeight = groundHeight + FLOAT_OFFSET_METERS;
   const topHeight = baseHeight + PETAL_THICKNESS_METERS;
 
-  const maxValue = Math.max(1, ...chartData.flat().map(Number));
+  //const maxValue = Math.max(1, ...chartData.flat().map(Number));
+  const maxValue = Math.max(
+    0.01,
+    ...chartData.map((faixas) => faixas.reduce((soma, v) => soma + Number(v), 0))
+  );
 
   chartData.forEach((directionData, directionIndex) => {
 

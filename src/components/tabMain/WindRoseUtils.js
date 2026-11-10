@@ -163,21 +163,28 @@ export function processWindRoseData(data) {
 
 
   // 5. Calcular percentuais
-  const formattedData = directions.map(
-    (direction) => {
-      const total =
-        frequencyData[direction].reduce(
-          (sum, value) => sum + value,
-          0
-        );
+  // const formattedData = directions.map(
+  //   (direction) => {
+  //     const total =
+  //       frequencyData[direction].reduce(
+  //         (sum, value) => sum + value,
+  //         0
+  //       );
 
-      return frequencyData[direction].map(
-        (value) =>
-          total > 0
-            ? Number(((value / total) * 100).toFixed(2))
-            : 0
-      );
-    }
+  //     return frequencyData[direction].map(
+  //       (value) =>
+  //         total > 0
+  //           ? Number(((value / total) * 100).toFixed(2))
+  //           : 0
+  //     );
+  //   }
+  // );
+  const totalHoras = medias.length;
+
+  const formattedData = directions.map((direction) =>
+    frequencyData[direction].map((value) =>
+      totalHoras > 0 ? Number(((value / totalHoras) * 100).toFixed(2)) : 0
+    )
   );
 
   return formattedData;
