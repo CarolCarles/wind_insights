@@ -25,6 +25,7 @@ import HistogramChart from "./tabMain/HistogramChart";
 import SpiralChart from "./tabMain/SpiralChart";
 import Analise from "./tabPotential/Analise";
 import DFAChart from "./tabStatistics/DFAChart";
+import ARIMAChart from "./tabStatistics/ARIMAChart";
 
 const TABS = [
   { key: "principal", label: "Principal" },
@@ -54,8 +55,11 @@ export default function DashboardPage() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [speedRange, setSpeedRange] = useState([0, 20]); // Intervalo inicial de velocidade ajustado
-  const [respostaApiSS, setRespostaApiSS] = useState(null); // Estado para armazenar a resposta da API
+
+  const [respostaApiSS, setRespostaApiSS] = useState(null);
   const [respostaApiDFA, setRespostaApiDFA] = useState(null);
+  const [respostaApiARIMA, setRespostaApiARIMA] = useState(null);
+
   const [rawRows, setRawRows] = useState(null);
   const [headers, setHeaders] = useState(null);
   const [columnMap, setColumnMap] = useState(null);
@@ -84,6 +88,23 @@ export default function DashboardPage() {
       setRespostaApiDFA(response.data);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
+    }
+  };
+
+  // ───────── Processamento ARIMA (decomposição + estacionariedade) ─────────
+  const enviarParaApiARIMA = async (dados) => {
+    try {
+      // Só as colunas que a análise usa (payload bem menor)
+      const leve = dados.map(({ year, month, day, hour, minute, ws100 }) => ({
+        year, month, day, hour, minute, ws100,
+      }));
+      const response = await axios.post('https://wind-insights.onrender.com/processarARIMA', leve);
+      setRespostaApiARIMA(response.data);
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+      setRespostaApiARIMA({
+        erro: error.response?.data?.erro || "Não foi possível calcular a análise. Tente novamente.",
+      });
     }
   };
 
@@ -207,7 +228,8 @@ export default function DashboardPage() {
 
       Promise.all([
         enviarParaApiSS(dados),
-        enviarParaApiDFA(dados)
+        enviarParaApiDFA(dados),
+        enviarParaApiARIMA(dados)
       ]);
     }
   }, [rawRows, columnMap]);
@@ -277,6 +299,7 @@ export default function DashboardPage() {
     setCsvData(null);
     setRespostaApiSS(null);
     setRespostaApiDFA(null);
+    setRespostaApiARIMA(null);
     setStationCoordinates(null);
     setMapperKey(prev => prev + 1);
 
@@ -364,6 +387,7 @@ export default function DashboardPage() {
     setStationCoordinates(null);
     setRespostaApiSS(null);
     setRespostaApiDFA(null);
+    setRespostaApiARIMA(null);
     setStartDate(null);
     setEndDate(null);
     setSpeedRange([0, 20]);
@@ -520,9 +544,14 @@ export default function DashboardPage() {
 
             {/* ── Estatísticas ── */}
             <TabPanel tabKey="estatisticas" active={activeTab}>
-              <Card>
-                <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
-              </Card>
+              <div className="flex flex-col gap-4">
+                <Card>
+                  <ARIMAChart data={respostaApiARIMA} />
+                </Card>
+                <Card>
+                  <DFAChart data={respostaApiDFA} totalRegistros={csvData?.length} />
+                </Card>
+              </div>
             </TabPanel>
 
             <TabNav tabs={TABS} active={activeTab} onChange={handleTabChange} />

@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
+import warnings
+from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.stattools import adfuller, kpss
 
 app = Flask(__name__)
 CORS(app)
@@ -330,6 +333,150 @@ def processar_dados_dfa():
         return jsonify({
             "erro": str(e)
         }), 500
+
+# ───────── Parâmetros da análise ARIMA (decomposição + estacionariedade) ─────────
+PERIODO_DIURNO = 24        # sazonalidade diurna, em horas (série agregada por hora)
+JANELA_TENDENCIA = 169     # janela do suavizador da tendência (ímpar): ~7 dias
+MAX_PONTOS_EXIBICAO = 5000 # limite de pontos enviados ao gráfico (os cálculos usam todos)
+MIN_HORAS = 24 * 14        # mínimo de 14 dias de dados
+
+
+def _num(valor, casas=4):
+    """Converte para float do Python. NaN/inf viram None (senão o JSON fica inválido)."""
+    try:
+        valor = float(valor)
+    except (TypeError, ValueError):
+        return None
+    return round(valor, casas) if np.isfinite(valor) else None
+
+
+def _testar_estacionariedade(valores):
+    """
+    ADF: H0 = raiz unitária (série NÃO estacionária).
+    KPSS: H0 = série estacionária.
+    Estacionária  -> ADF rejeita H0 (p < 0,05) E KPSS não rejeita (p >= 0,05).
+    Não estac.    -> ADF não rejeita E KPSS rejeita.
+    Inconclusiva  -> os dois testes discordam.
+    """
+    x = np.asarray(valores, dtype=float)
+    x = x[np.isfinite(x)]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # KPSS avisa quando o p-valor sai da tabela (0,01 a 0,10)
+        # Defasagem fixa (24 h) em vez de autolag: com dezenas de milhares de pontos,
+        # o autolag ajustaria dezenas de regressões e estouraria o tempo do servidor.
+        adf_estat, adf_p = adfuller(x, maxlag=PERIODO_DIURNO, autolag=None, regression="c")[:2]
+        kpss_estat, kpss_p = kpss(x, regression="c", nlags="auto")[:2]
+
+    adf_ok = adf_p < 0.05
+    kpss_ok = kpss_p >= 0.05
+
+    if adf_ok and kpss_ok:
+        conclusao = "estacionaria"
+    elif (not adf_ok) and (not kpss_ok):
+        conclusao = "nao_estacionaria"
+    else:
+        conclusao = "inconclusiva"
+
+    return {
+        "adf_estatistica": _num(adf_estat),
+        "adf_p": _num(adf_p, 6),
+        "kpss_estatistica": _num(kpss_estat),
+        "kpss_p": _num(kpss_p, 6),
+        "conclusao": conclusao,
+    }
+
+
+@app.route('/processarARIMA', methods=['POST'])
+def processar_dados_arima():
+    """
+    Etapa de identificação do ARIMA (Box-Jenkins), sobre a série agregada em média horária:
+    - decomposição STL: tendência + sazonalidade diurna + resíduo (ruído)
+    - testes de estacionariedade (ADF e KPSS) na série e na 1ª diferença
+    - sugestão da ordem de diferenciação d
+    """
+    try:
+        dados = request.get_json()
+        df = pd.DataFrame(dados)
+
+        colunas = ['year', 'month', 'day', 'hour', 'minute', 'ws100']
+        if not all(c in df.columns for c in colunas):
+            return jsonify({"erro": "Dados incompletos para a análise."}), 400
+
+        tempo = pd.to_datetime(df[['year', 'month', 'day', 'hour', 'minute']], errors='coerce')
+        serie = pd.Series(pd.to_numeric(df['ws100'], errors='coerce').to_numpy(), index=tempo)
+        serie = serie[serie.index.notna()].dropna()
+        serie = serie[~serie.index.duplicated(keep='first')].sort_index()
+
+        if len(serie) < 2:
+            return jsonify({"erro": "Poucos dados válidos para a análise."}), 400
+
+        # A análise assume amostragem de até 1 hora (10 min ou horária)
+        intervalo = serie.index.to_series().diff().median()
+        if pd.notna(intervalo) and intervalo > pd.Timedelta(hours=1):
+            return jsonify({
+                "erro": "Esta análise exige dados com intervalo de até 1 hora (por exemplo, 10 minutos ou horários)."
+            }), 400
+
+        # Média horária (a sazonalidade diurna passa a ter período 24)
+        horaria = serie.resample('1h').mean()
+
+        if len(horaria) < MIN_HORAS:
+            return jsonify({"erro": "Série muito curta: são necessários pelo menos 14 dias de dados."}), 400
+
+        faltantes = int(horaria.isna().sum())
+        percentual_interpolado = faltantes / len(horaria) * 100
+        # O STL não aceita lacunas: preenche por interpolação linear no tempo
+        horaria = horaria.interpolate(method='time', limit_direction='both')
+
+        # ───────── Decomposição STL ─────────
+        stl = STL(horaria, period=PERIODO_DIURNO, trend=JANELA_TENDENCIA, robust=False).fit()
+        tendencia, sazonal, residuo = stl.trend, stl.seasonal, stl.resid
+
+        var_residuo = float(np.var(residuo))
+        forca_tendencia = max(0.0, 1 - var_residuo / float(np.var(tendencia + residuo)))
+        forca_sazonal = max(0.0, 1 - var_residuo / float(np.var(sazonal + residuo)))
+        ruido_pct = var_residuo / float(np.var(horaria)) * 100
+
+        # ───────── Estacionariedade ─────────
+        original = _testar_estacionariedade(horaria.to_numpy())
+        diferenciada = _testar_estacionariedade(np.diff(horaria.to_numpy()))
+        d_sugerido = 0 if original["conclusao"] == "estacionaria" else 1
+
+        # ───────── Série reduzida só para exibição ─────────
+        passo = max(1, int(np.ceil(len(horaria) / MAX_PONTOS_EXIBICAO)))
+        indice = horaria.index[::passo]
+        t_ms = ((indice - pd.Timestamp("1970-01-01")) // pd.Timedelta(milliseconds=1)).tolist()
+
+        def reduzir(s):
+            return [_num(v, 3) for v in s.iloc[::passo]]
+
+        return jsonify({
+            "periodo": PERIODO_DIURNO,
+            "n_horas": int(len(horaria)),
+            "inicio": horaria.index[0].strftime('%Y-%m-%d %H:%M'),
+            "fim": horaria.index[-1].strftime('%Y-%m-%d %H:%M'),
+            "percentual_interpolado": _num(percentual_interpolado, 2),
+            "passo_exibicao": passo,
+            "t": t_ms,
+            "observada": reduzir(horaria),
+            "tendencia": reduzir(tendencia),
+            "sazonal": reduzir(sazonal),
+            "residuo": reduzir(residuo),
+            "metricas": {
+                "forca_tendencia": _num(forca_tendencia, 3),
+                "forca_sazonalidade": _num(forca_sazonal, 3),
+                "ruido_pct": _num(ruido_pct, 2),
+            },
+            "estacionariedade": {
+                "original": original,
+                "diferenciada": diferenciada,
+                "d_sugerido": d_sugerido,
+            },
+        }), 200
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
  
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000, debug=True)
